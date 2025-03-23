@@ -7,61 +7,61 @@ class NoteDetail extends StatefulWidget {
   final String appBarTitle;
   final Note note;
 
-  const NoteDetail({super.key, required this.note, required this.appBarTitle});
+  const NoteDetail(this.note, this.appBarTitle, {super.key});
 
   @override
-  State<NoteDetail> createState() => _NoteDetailState();
+  State<StatefulWidget> createState() => NoteDetailState();
 }
 
-class _NoteDetailState extends State<NoteDetail> {
+class NoteDetailState extends State<NoteDetail> {
   static final _priorities = ['High', 'Low'];
 
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  DatabaseHelper helper = DatabaseHelper();
 
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
+  late String appBarTitle;
+  late Note note;
 
-  late final String appBarTitle = widget.appBarTitle;
-  late final Note note = widget.note;
+  late TextEditingController titleController;
+  late TextEditingController descriptionController;
 
   @override
-  void dispose() {
-    // Dispose the controllers when the widget is disposed
-    titleController.dispose();
-    descriptionController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Initialize variables here
+    appBarTitle = widget.appBarTitle;
+    note = widget.note;
+
+    // Initialize the controllers with current values from note
+    titleController = TextEditingController(text: note.title);
+    descriptionController = TextEditingController(text: note.description);
   }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle? textStyle = Theme.of(context).textTheme.titleMedium;
+    TextStyle textStyle = Theme.of(context).textTheme.titleLarge!;
 
-    titleController.text = note.title;
-    descriptionController.text = note.description;
-
-    // ignore: deprecated_member_use, WillPopScope is deprecated
     return WillPopScope(
-      onWillPop: () {
+      onWillPop: () async {
         moveToLastScreen();
-        return Future.value(false);
+        return true; // Ensure that we return a value here
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(appBarTitle),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               moveToLastScreen();
             },
           ),
         ),
         body: Padding(
-          padding: EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
+          padding: const EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
           child: ListView(
             children: <Widget>[
-              //* First Element
+              //* First element
               ListTile(
-                title: DropdownButton(
+                title: DropdownButton<String>(
                   items:
                       _priorities.map((String dropDownStringItem) {
                         return DropdownMenuItem<String>(
@@ -82,7 +82,7 @@ class _NoteDetailState extends State<NoteDetail> {
 
               //* Second Element
               Padding(
-                padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
                 child: TextField(
                   controller: titleController,
                   style: textStyle,
@@ -93,8 +93,8 @@ class _NoteDetailState extends State<NoteDetail> {
                   decoration: InputDecoration(
                     labelText: 'Title',
                     labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     ),
                   ),
                 ),
@@ -102,7 +102,7 @@ class _NoteDetailState extends State<NoteDetail> {
 
               //* Third Element
               Padding(
-                padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
                 child: TextField(
                   controller: descriptionController,
                   style: textStyle,
@@ -113,8 +113,8 @@ class _NoteDetailState extends State<NoteDetail> {
                   decoration: InputDecoration(
                     labelText: 'Description',
                     labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     ),
                   ),
                 ),
@@ -122,7 +122,7 @@ class _NoteDetailState extends State<NoteDetail> {
 
               //* Fourth Element
               Padding(
-                padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
@@ -131,31 +131,26 @@ class _NoteDetailState extends State<NoteDetail> {
                           foregroundColor: Theme.of(context).primaryColorLight,
                           backgroundColor: Theme.of(context).primaryColorDark,
                         ),
-                        child: Text('Save', textScaler: TextScaler.linear(1.5)),
+                        child: const Text('Save', textScaleFactor: 1.5),
                         onPressed: () {
                           setState(() {
-                            debugPrint('Save button clicked');
+                            debugPrint("Save button clicked");
                             _save();
                           });
                         },
                       ),
                     ),
-
-                    Container(width: 5.0),
-
+                    const SizedBox(width: 5.0),
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Theme.of(context).primaryColorLight,
                           backgroundColor: Theme.of(context).primaryColorDark,
                         ),
-                        child: Text(
-                          'Delete',
-                          textScaler: TextScaler.linear(1.5),
-                        ),
+                        child: const Text('Delete', textScaleFactor: 1.5),
                         onPressed: () {
                           setState(() {
-                            debugPrint('Delete button clicked');
+                            debugPrint("Delete button clicked");
                             _delete();
                           });
                         },
@@ -175,23 +170,7 @@ class _NoteDetailState extends State<NoteDetail> {
     Navigator.pop(context, true);
   }
 
-  // convert int priority to String priority and display it to user in DropDown
-  String getPriorityAsString(int value) {
-    String priority;
-    switch (value) {
-      case 1:
-        priority = _priorities[0]; // 'High'
-        break;
-      case 2:
-        priority = _priorities[1]; // 'Low'
-        break;
-      default:
-        priority = _priorities[1];
-    }
-    return priority;
-  }
-
-  // convert String priority to int priority and save it to database
+  // Convert the String priority in the form of integer before saving it to Database
   void updatePriorityAsInt(String value) {
     switch (value) {
       case 'High':
@@ -203,25 +182,44 @@ class _NoteDetailState extends State<NoteDetail> {
     }
   }
 
+  // Convert int priority to String priority and display it to user in DropDown
+  String getPriorityAsString(int value) {
+    String priority;
+    switch (value) {
+      case 1:
+        priority = _priorities[0]; // 'High'
+        break;
+      case 2:
+        priority = _priorities[1]; // 'Low'
+        break;
+      default:
+        priority = _priorities[1]; // 'Low' if an invalid value exists
+    }
+    return priority;
+  }
+
+  // Update the title of Note object
   void updateTitle() {
     note.title = titleController.text;
   }
 
+  // Update the description of Note object
   void updateDescription() {
     note.description = descriptionController.text;
   }
 
+  // Save data to database
   void _save() async {
     moveToLastScreen();
-    note.date = DateFormat.yMMMd().format(DateTime.now());
 
+    note.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
-    if (note.id != 0) {
+    if (note.id != null) {
       // Case 1: Update operation
-      result = await databaseHelper.updateNote(note);
+      result = await helper.updateNote(note);
     } else {
-      // Case 2: Insert operation
-      result = await databaseHelper.insertNote(note);
+      // Case 2: Insert Operation
+      result = await helper.insertNote(note);
     }
 
     if (result != 0) {
@@ -233,30 +231,30 @@ class _NoteDetailState extends State<NoteDetail> {
     }
   }
 
+  void _delete() async {
+    moveToLastScreen();
+
+    // Case 1: If user is trying to delete the NEW NOTE i.e. he has come to
+    // the detail page by pressing the FAB of NoteList page.
+    if (note.id == null) {
+      _showAlertDialog('Status', 'No Note was deleted');
+      return;
+    }
+
+    // Case 2: User is trying to delete the old note that already has a valid ID.
+    int result = await helper.deleteNote(note.id!);
+    if (result != 0) {
+      _showAlertDialog('Status', 'Note Deleted Successfully');
+    } else {
+      _showAlertDialog('Status', 'Error Occured while Deleting Note');
+    }
+  }
+
   void _showAlertDialog(String title, String message) {
     AlertDialog alertDialog = AlertDialog(
       title: Text(title),
       content: Text(message),
     );
     showDialog(context: context, builder: (_) => alertDialog);
-  }
-
-  void _delete() async {
-    moveToLastScreen();
-
-    // Case 1: If the user is trying to delete the NEW NOTE i.e. he has come to
-    // the detail page by pressing the FAB of NoteList page
-    if (note.id == 0) {
-      _showAlertDialog('Status', 'No Note was deleted');
-      return;
-    }
-
-    // Case 2: User is trying to delete the old note that already has a valid ID
-    int result = await databaseHelper.deleteNote(note.id);
-    if (result != 0) {
-      _showAlertDialog('Status', 'Note Deleted Successfully');
-    } else {
-      _showAlertDialog('Status', 'Error Occurred while Deleting Note');
-    }
   }
 }

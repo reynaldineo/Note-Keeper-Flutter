@@ -95,7 +95,7 @@ class _NoteListState extends State<NoteList> {
   }
 
   void _delete(BuildContext context, Note note) async {
-    int result = await databaseHelper.deleteNote(note.id);
+    int result = await databaseHelper.deleteNote(note.id!);
     if (result != 0) {
       _showSnackBar(context, 'Note Deleted Successfully');
       updateListView();
@@ -110,9 +110,7 @@ class _NoteListState extends State<NoteList> {
   void navigateToDetail(Note note, String title) async {
     bool result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => NoteDetail(note: note, appBarTitle: title),
-      ),
+      MaterialPageRoute(builder: (context) => NoteDetail(note, title)),
     );
 
     if (result == true) {
@@ -126,7 +124,7 @@ class _NoteListState extends State<NoteList> {
       Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
       noteListFuture.then((noteList) {
         setState(() {
-          noteList = noteList;
+          this.noteList = noteList;
           count = noteList.length;
         });
       });
