@@ -1,12 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 import 'dart:io';
 import 'package:tugas_5/models/note.dart';
 
 class DatabaseHelper {
-  static DatabaseHelper _databaseHelper;
-  static Database _database;
+  static DatabaseHelper? _databaseHelper;
+  static Database? _database;
 
   String noteTable = 'note_table';
   String colId = 'id';
@@ -20,18 +19,18 @@ class DatabaseHelper {
 
   factory DatabaseHelper() {
     _databaseHelper ??= DatabaseHelper._createInstance(); // Lazy initialization
-    return _databaseHelper;
+    return _databaseHelper!;
   }
 
   Future<Database> get database async {
     _database ??= await initializeDatabase();
-    return _database;
+    return _database!;
   }
 
   // Initialize database
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = join(directory.path, 'notes.db');
+    String path = '${directory.path}notes.db';
 
     var notesDatabase = await openDatabase(
       path,
@@ -99,5 +98,17 @@ class DatabaseHelper {
     );
     int result = Sqflite.firstIntValue(x) ?? 0;
     return result;
+  }
+
+  // Get the 'Map List' [List<Map>] and convert it to 'Note List' [List<Note>]
+  Future<List<Note>> getNoteList() async {
+    var noteMapList = await getNoteMapList();
+    int count = noteMapList.length;
+
+    List<Note> noteList = <Note>[];
+    for (int i = 0; i < count; i++) {
+      noteList.add(Note.fromMapObject(noteMapList[i]));
+    }
+    return noteList;
   }
 }
