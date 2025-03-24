@@ -27,27 +27,40 @@ class NoteDetailState extends State<NoteDetail> {
   @override
   void initState() {
     super.initState();
-    // Initialize variables here
     appBarTitle = widget.appBarTitle;
     note = widget.note;
 
-    // Initialize the controllers with current values from note
     titleController = TextEditingController(text: note.title);
     descriptionController = TextEditingController(text: note.description);
   }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).textTheme.titleLarge!;
+    TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+    );
 
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
         moveToLastScreen();
-        return true; // Ensure that we return a value here
+        return true;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(appBarTitle),
+          title: Text(
+            appBarTitle,
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.indigo[800],
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -56,110 +69,148 @@ class NoteDetailState extends State<NoteDetail> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
+          padding: const EdgeInsets.all(20.0),
           child: ListView(
             children: <Widget>[
-              //* First element
+              //* Priority Dropdown
               ListTile(
                 title: DropdownButton<String>(
+                  isExpanded: true,
                   items:
                       _priorities.map((String dropDownStringItem) {
                         return DropdownMenuItem<String>(
                           value: dropDownStringItem,
-                          child: Text(dropDownStringItem),
+                          child: Text(dropDownStringItem, style: textStyle),
                         );
                       }).toList(),
-                  style: textStyle,
                   value: getPriorityAsString(note.priority),
                   onChanged: (valueSelectedByUser) {
                     setState(() {
-                      debugPrint('User selected $valueSelectedByUser');
                       updatePriorityAsInt(valueSelectedByUser!);
                     });
                   },
                 ),
               ),
 
-              //* Second Element
+              //* Title TextField
               Padding(
-                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                padding: const EdgeInsets.only(top: 15.0),
                 child: TextField(
                   controller: titleController,
                   style: textStyle,
                   onChanged: (value) {
-                    debugPrint('Something changed in Title Text Field');
                     updateTitle();
                   },
                   decoration: InputDecoration(
                     labelText: 'Title',
-                    labelStyle: textStyle,
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    labelStyle: textStyle.copyWith(fontSize: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: Colors.indigo, width: 2),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(
+                        color: Colors.indigoAccent,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(15.0),
                   ),
                 ),
               ),
 
-              //* Third Element
+              //* Description TextField
               Padding(
                 padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
                 child: TextField(
                   controller: descriptionController,
                   style: textStyle,
                   onChanged: (value) {
-                    debugPrint('Something changed in Description Text Field');
                     updateDescription();
                   },
+                  maxLines: 4,
                   decoration: InputDecoration(
                     labelText: 'Description',
-                    labelStyle: textStyle,
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    labelStyle: textStyle.copyWith(fontSize: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: Colors.indigo, width: 2),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(
+                        color: Colors.indigoAccent,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(15.0),
                   ),
                 ),
               ),
 
-              //* Fourth Element
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColorLight,
-                          backgroundColor: Theme.of(context).primaryColorDark,
-                        ),
-                        child: const Text('Save', textScaleFactor: 1.5),
-                        onPressed: () {
-                          setState(() {
-                            debugPrint("Save button clicked");
-                            _save();
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 5.0),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColorLight,
-                          backgroundColor: Theme.of(context).primaryColorDark,
-                        ),
-                        child: const Text('Delete', textScaleFactor: 1.5),
-                        onPressed: () {
-                          setState(() {
-                            debugPrint("Delete button clicked");
-                            _delete();
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+              //* Action Buttons (Save, Delete)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _buildActionButton(
+                    text: 'Delete',
+                    colorStart: Colors.redAccent,
+                    colorEnd: Colors.red,
+                    onPressed: () {
+                      _delete();
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  _buildActionButton(
+                    text: 'Save',
+                    colorStart: Colors.indigo[800]!,
+                    colorEnd: Colors.indigoAccent,
+                    onPressed: () {
+                      _save();
+                    },
+                  ),
+                ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to create a stylish action button
+  Widget _buildActionButton({
+    required String text,
+    required Color colorStart,
+    required Color colorEnd,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [colorStart, colorEnd],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            child: Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -170,7 +221,6 @@ class NoteDetailState extends State<NoteDetail> {
     Navigator.pop(context, true);
   }
 
-  // Convert the String priority in the form of integer before saving it to Database
   void updatePriorityAsInt(String value) {
     switch (value) {
       case 'High':
@@ -182,51 +232,38 @@ class NoteDetailState extends State<NoteDetail> {
     }
   }
 
-  // Convert int priority to String priority and display it to user in DropDown
   String getPriorityAsString(int value) {
-    String priority;
     switch (value) {
       case 1:
-        priority = _priorities[0]; // 'High'
-        break;
+        return _priorities[0]; // 'High'
       case 2:
-        priority = _priorities[1]; // 'Low'
-        break;
+        return _priorities[1]; // 'Low'
       default:
-        priority = _priorities[1]; // 'Low' if an invalid value exists
+        return _priorities[1]; // 'Low' if an invalid value exists
     }
-    return priority;
   }
 
-  // Update the title of Note object
   void updateTitle() {
     note.title = titleController.text;
   }
 
-  // Update the description of Note object
   void updateDescription() {
     note.description = descriptionController.text;
   }
 
-  // Save data to database
   void _save() async {
     moveToLastScreen();
-
     note.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
     if (note.id != null) {
-      // Case 1: Update operation
       result = await helper.updateNote(note);
     } else {
-      // Case 2: Insert Operation
       result = await helper.insertNote(note);
     }
 
     if (result != 0) {
-      // Success
       _showAlertDialog('Status', 'Note Saved Successfully');
     } else {
-      // Failure
       _showAlertDialog('Status', 'Problem Saving Note');
     }
   }
@@ -234,27 +271,103 @@ class NoteDetailState extends State<NoteDetail> {
   void _delete() async {
     moveToLastScreen();
 
-    // Case 1: If user is trying to delete the NEW NOTE i.e. he has come to
-    // the detail page by pressing the FAB of NoteList page.
     if (note.id == null) {
       _showAlertDialog('Status', 'No Note was deleted');
       return;
     }
 
-    // Case 2: User is trying to delete the old note that already has a valid ID.
     int result = await helper.deleteNote(note.id!);
     if (result != 0) {
       _showAlertDialog('Status', 'Note Deleted Successfully');
     } else {
-      _showAlertDialog('Status', 'Error Occured while Deleting Note');
+      _showAlertDialog('Status', 'Error Occurred while Deleting Note');
     }
   }
 
   void _showAlertDialog(String title, String message) {
-    AlertDialog alertDialog = AlertDialog(
-      title: Text(title),
-      content: Text(message),
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismissal by tapping outside
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0), // Rounded corners
+          ),
+          backgroundColor:
+              Colors.transparent, // Transparent background to apply gradient
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // White background for the dialog
+              borderRadius: BorderRadius.circular(16.0), // Rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                  blurRadius: 10,
+                  offset: Offset(0, 4), // Shadow effect
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20.0), // Padding inside the dialog
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Size the dialog to the content
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title Text
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo[800], // Dark indigo color for title
+                  ),
+                ),
+                const SizedBox(height: 12), // Space between title and message
+                // Message Text
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color:
+                        Colors.black87, // Slightly muted black for description
+                    height: 1.5, // Line height for better readability
+                  ),
+                ),
+                const SizedBox(height: 20), // Space between message and button
+                // Action Button
+                Align(
+                  alignment: Alignment.centerRight, // Align button to the right
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 30,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo, // Indigo button background
+                        borderRadius: BorderRadius.circular(
+                          12.0,
+                        ), // Rounded button
+                      ),
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white, // White text for contrast
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
-    showDialog(context: context, builder: (_) => alertDialog);
   }
 }
