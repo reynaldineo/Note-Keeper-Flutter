@@ -8,13 +8,17 @@ A Flutter project for the **Programming for Mobile Devices** course. This applic
 
 ## Link Short Demo
 
-https://drive.google.com/file/d/1hPYKRVR4sTRozyn9NKk0ETBPY-3exhsN/view?usp=sharing
+https://drive.google.com/file/d/1eMZCBLeg7JuhDX8sW-AkNjA7rxsvUMyq/view
 
 ## Technologies Used
 
 -   **Flutter**: Framework for building cross-platform apps.
 -   **Dart**: Programming language used for Flutter development.
 -   **SQLite**: Local database for storing notes.
+
+### Reference Link
+
+https://youtu.be/xke5_yGL0uk?si=oa3alevcPgqgLKAP
 
 ## Features
 
